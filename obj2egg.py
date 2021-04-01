@@ -19,7 +19,7 @@
 
 ##	Imports
 #		Panda3D Libraries
-from panda3d.core import Vec3D, Vec4, Point3D, GlobPattern, Filename
+from panda3d.core import Vec3D, Vec4, Point3D, Point2D, GlobPattern, Filename
 from panda3d.egg import EggLine, EggData, EggGroup, EggVertex, EggVertexPool, EggPolygon, EggTexture, EggMaterial
 
 #		System Libraries
@@ -222,6 +222,8 @@ class ObjFile:
 				if not tokens:
 					continue
 				
+				if len(tokens) < 2:
+					tokens += [""]
 				commands = 	{
 							"mtllib":	[self.__mtllib, 		tokens[1]],
 							"g":		[self.__newgroup, 		"".join(tokens[1:])], 
@@ -352,17 +354,17 @@ class ObjFile:
 	def __eggifyverts(self, eprim, evpool, vlist):
 		for vertex in vlist:
 			ixyz = vertex['v']
-			vinfo = self.points[ixyz-1]
+			vinfo = self.points[ixyz-1 if ixyz>0 else ixyz]
 			vxyz, vmeta = vinfo
 			ev = EggVertex()
 			ev.setPos(Point3D(vxyz[0], vxyz[1], vxyz[2]))
 			iuv = vertex['vt']
 			if iuv is not None:
-				vuv = self.uvs[iuv-1]
+				vuv = self.uvs[iuv-1 if iuv>0 else iuv]
 				ev.setUv(Point2D(vuv[0], vuv[1]))
 			inormal = vertex['vn']
 			if inormal is not None:
-				vn = self.normals[inormal-1]
+				vn = self.normals[inormal-1 if inormal>0 else inormal]
 				ev.setNormal(Vec3D(vn[0], vn[1], vn[2]))
 			evpool.addVertex(ev)
 			eprim.addVertex(ev)
